@@ -8,9 +8,21 @@
 
 setlocal EnableExtensions EnableDelayedExpansion
 
+:: --- 0. Fast CLI Flags (CI / Scripting Support) ---
+if /I "%~1"=="--version" (
+    echo USB Shortcut Fix v3.2.0
+    exit /b 0
+)
+if /I "%~1"=="--help" (
+    echo USB Shortcut Fix v3.2.0
+    echo Usage: USB_Shortcut_Fix.bat [DriveLetter]
+    echo Example: USB_Shortcut_Fix.bat E:
+    exit /b 0
+)
+
 :: --- 1. Terminal Configuration & Visual Theme ---
 chcp 65001 >nul 2>&1
-title USB Shortcut Virus Cleaner & Recovery Suite v3.2.0
+title USB Shortcut Virus Cleaner ^& Recovery Suite v3.2.0
 
 :: Define ANSI Escape Sequences for Modern Styling
 for /F %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
@@ -30,9 +42,9 @@ set "CLR_BG_BLUE=%ESC%[44m%CLR_WHITE%"
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo %CLR_YELLOW%[!] Administrator privileges required for low-level attribute restoration.%CLR_RESET%
-    echo %CLR_CYAN%[*] Requesting User Account Control (UAC) elevation...%CLR_RESET%
+    echo %CLR_CYAN%[*] Requesting User Account Control [UAC] elevation...%CLR_RESET%
     powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-    exit /b
+    exit /b 0
 )
 
 :: --- 3. Header & Banner Display ---
@@ -77,8 +89,10 @@ echo.
 
 :: --- 6. Drive Letter Input and Validation ---
 :PROMPT_DRIVE
-set "USER_INPUT="
-set /p "USER_INPUT=%CLR_BOLD%Enter Target Drive Letter (e.g., E or E:): %CLR_RESET%"
+set "USER_INPUT=%~1"
+if "%USER_INPUT%"=="" (
+    set /p "USER_INPUT=%CLR_BOLD%Enter Target Drive Letter (e.g., E or E:): %CLR_RESET%"
+)
 
 if "%USER_INPUT%"=="" (
     echo %CLR_RED%[ERROR] No drive letter entered. Operation aborted.%CLR_RESET%
@@ -107,6 +121,7 @@ if /I "%TARGET_DRIVE%"=="%SystemDrive%" (
     echo %CLR_YELLOW%Stripping system attributes from C:\ can break operating system stability.%CLR_RESET%
     echo %CLR_YELLOW%Please specify a removable USB drive letter.%CLR_RESET%
     echo.
+    set "USER_INPUT="
     goto :PROMPT_DRIVE
 )
 
@@ -116,6 +131,7 @@ if not exist "%TARGET_ROOT%" (
     echo %CLR_RED%[ERROR] Drive %TARGET_DRIVE% does not exist or is not connected.%CLR_RESET%
     echo %CLR_YELLOW%Please verify the connection in File Explorer and re-enter.%CLR_RESET%
     echo.
+    set "USER_INPUT="
     goto :PROMPT_DRIVE
 )
 
@@ -126,7 +142,10 @@ if "%DETECTED_TYPE%"=="3" (
     echo.
     echo %CLR_YELLOW%[WARNING] %TARGET_DRIVE% appears to be an internal Fixed Hard Disk, not a Removable USB drive.%CLR_RESET%
     choice /C YN /N /M "%CLR_YELLOW%Are you absolutely sure you want to proceed on this drive? [Y/N]: %CLR_RESET%"
-    if errorlevel 2 goto :PROMPT_DRIVE
+    if errorlevel 2 (
+        set "USER_INPUT="
+        goto :PROMPT_DRIVE
+    )
 )
 
 echo.

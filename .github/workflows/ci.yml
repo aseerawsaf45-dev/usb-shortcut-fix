@@ -32,5 +32,6 @@ jobs:
       - name: Validate Batch Syntax
         shell: cmd
         run: |
-          echo Validating batch files syntax...
-          cmd /c "call USB_Shortcut_Fix.bat --help" || echo Batch validation finished
+          echo Validating batch CLI execution and syntax...
+          cmd /c "call USB_Shortcut_Fix.bat --version"
+          cmd /c "call USB_Shortcut_Fix.bat --help"

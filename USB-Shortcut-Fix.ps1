@@ -66,7 +66,7 @@ param (
 # Enforce TLS 1.2+ & UTF-8 output
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-function Write-StyledBanner {
+function Show-StyledBanner {
     Clear-Host
     Write-Host "================================================================================" -ForegroundColor Cyan
     Write-Host "         USB SHORTCUT VIRUS REMEDIATION & FORENSIC SUITE (POWERSHELL)           " -ForegroundColor Green
@@ -74,16 +74,16 @@ function Write-StyledBanner {
     Write-Host "================================================================================" -ForegroundColor Cyan
 }
 
-function Test-AdminPrivileges {
+function Test-AdminPrivilege {
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
     return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-function Get-RemovableDrives {
+function Get-RemovableDrive {
     Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DriveType -eq 2 }
 }
 
-function Stop-MalwareScriptEngines {
+function Stop-MalwareScriptEngine {
     Write-Host "`n[PHASE 1/5] Process Containment" -ForegroundColor White -NoNewline
     Write-Host " -> Terminating rogue script host engines..." -ForegroundColor Cyan
 
@@ -116,21 +116,21 @@ function Inspect-LnkFile {
 }
 
 # --- Main Execution Flow ---
-Write-StyledBanner
+Show-StyledBanner
 
-if (-not (Test-AdminPrivileges)) {
+if (-not (Test-AdminPrivilege)) {
     Write-Warning "This script is not running with elevated Administrator privileges."
     Write-Host "Certain protected attributes or locked files may fail to unlock without elevation.`n" -ForegroundColor Yellow
 }
 
 # 1. Process Containment
 if (-not $ScanOnly) {
-    Stop-MalwareScriptEngines
+    Stop-MalwareScriptEngine
 }
 
 # 2. Drive Selection
 Write-Host "`n[PHASE 2/5] Drive Discovery & Selection" -ForegroundColor White
-$removableDrives = Get-RemovableDrives
+$removableDrives = Get-RemovableDrive
 
 if (-not $DriveLetter) {
     if ($AutoSelectUSB -and $removableDrives) {
