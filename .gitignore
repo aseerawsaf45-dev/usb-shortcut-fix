@@ -1,0 +1,19 @@
+# Logs and reports
+*_Report_*.txt
+*_Forensics_*.json
+*.log
+
+# Quarantine directories
+_Quarantine_*/
+_USB_Quarantine_*/
+
+# OS artifacts
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+System Volume Information/
+
+# Editors
+.vscode/
+.idea/
+*.swp
